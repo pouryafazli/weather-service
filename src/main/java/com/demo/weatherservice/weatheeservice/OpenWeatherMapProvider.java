@@ -2,6 +2,7 @@ package com.demo.weatherservice.weatheeservice;
 
 import com.demo.weatherservice.config.WeatherConfig;
 import com.demo.weatherservice.exception.CityNotFoundException;
+import com.demo.weatherservice.exception.ServiceUnavailableException;
 import com.demo.weatherservice.exception.ZipcodeNotFoundException;
 import com.demo.weatherservice.response.WeatherResponse;
 import feign.FeignException;
@@ -24,12 +25,17 @@ public class OpenWeatherMapProvider implements WeatherProvider{
         this.weatherApiClient = weatherApiClient;
         this.weatherConfig = weatherConfig;
     }
+
     @Override
     public WeatherResponse getWeatherByCoordinates(Double latitude, Double longitude) {
         logger.info("Getting weather by coordinates: latitude={}, longitude={}", latitude, longitude);
-        var response = weatherApiClient.getWeatherByCoordinates(latitude, longitude, weatherConfig.getApiKey());
-        logger.info("Weather found for coordinates {}{}: {}", latitude, longitude, response);
-        return response;
+        try {
+            var response = weatherApiClient.getWeatherByCoordinates(latitude, longitude, weatherConfig.getApiKey());
+            logger.info("Weather found for coordinates {}{}: {}", latitude, longitude, response);
+            return response;
+        } catch (Exception e) {
+            throw new ServiceUnavailableException(e.getMessage());
+        }
     }
 
     @Override
@@ -45,6 +51,8 @@ public class OpenWeatherMapProvider implements WeatherProvider{
         } catch (FeignException.NotFound e) {
             logger.warn("City not found: {}", cityName);
             throw new CityNotFoundException(String.format("City %s not found", cityName), e.getCause());
+        } catch (Exception e) {
+            throw new ServiceUnavailableException(e.getMessage());
         }
     }
 
@@ -62,6 +70,8 @@ public class OpenWeatherMapProvider implements WeatherProvider{
         } catch (FeignException.NotFound e) {
             logger.warn("Zipcode not found: {}", zipcode);
             throw new ZipcodeNotFoundException(String.format("Zipcode %s not found", zipcode), e.getCause());
+        } catch (Exception e) {
+            throw new ServiceUnavailableException(e.getMessage());
         }
     }
 }
