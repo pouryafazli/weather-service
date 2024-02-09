@@ -10,10 +10,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 @Component
-public class OpenWeatherMapProvider implements WeatherProvider{
+public class OpenWeatherMapProvider implements WeatherProvider, GeoLocationProvider{
 
     private static final Logger logger = LoggerFactory.getLogger(OpenWeatherMapProvider.class);
 
@@ -73,5 +75,13 @@ public class OpenWeatherMapProvider implements WeatherProvider{
         } catch (Exception e) {
             throw new ServiceUnavailableException(e.getMessage());
         }
+    }
+
+
+    public List<String> getGeoLocationValues(String city) {
+        if("Montreal".equalsIgnoreCase(city)){
+            return List.of("1","2");
+        }
+        return Collections.emptyList();
     }
 }

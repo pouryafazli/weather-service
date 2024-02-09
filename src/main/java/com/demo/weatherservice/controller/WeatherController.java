@@ -1,5 +1,6 @@
 package com.demo.weatherservice.controller;
 
+import com.demo.weatherservice.service.GeoLocationService;
 import com.demo.weatherservice.service.WeatherService;
 import com.demo.weatherservice.response.WeatherResponse;
 import jakarta.validation.Valid;
@@ -8,9 +9,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/weather")
@@ -18,9 +23,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class WeatherController {
 
     private final WeatherService weatherService;
+    private final GeoLocationService geoLocationService;
 
-    public WeatherController(WeatherService weatherService){
+    public WeatherController(WeatherService weatherService,
+                             GeoLocationService geoLocationService){
         this.weatherService = weatherService;
+        this.geoLocationService = geoLocationService;
     }
 
     @GetMapping
@@ -43,5 +51,12 @@ public class WeatherController {
         var weather = weatherService.getWeatherByZipcode(zipcode, countryCode);
         return ResponseEntity.ok(weather);
     }
+
+    @PostMapping
+    public ResponseEntity<List<String>> getGeoLocationOfCity(@RequestBody String city) {
+        return ResponseEntity.ok(geoLocationService.getGeoLocation(city));
+
+    }
+
 
 }
